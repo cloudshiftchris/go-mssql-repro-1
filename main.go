@@ -61,11 +61,6 @@ func main() {
 	}
 	defer tx.Commit()
 
-	_, err = tx.Exec("SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;")
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to set tx isolation level")
-	}
-
 	log.Info().Msg("Executing query")
 	/*
 	  Below query doesn't return any records.  It hangs, never returning from tx.Query.
