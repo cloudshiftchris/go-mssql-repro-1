@@ -1,7 +1,7 @@
 module go.cloudshiftdev.io/go-mssql-repro-1
 
 require (
-	github.com/denisenkom/go-mssqldb v0.12.3
+	github.com/microsoft/go-mssqldb v0.19.0
 	github.com/rs/zerolog v1.28.0
 )
 
