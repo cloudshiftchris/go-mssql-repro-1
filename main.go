@@ -6,12 +6,14 @@ import (
 	"flag"
 	"fmt"
 	"github.com/golang-sql/sqlexp"
+	"github.com/google/uuid"
 	_ "github.com/microsoft/go-mssqldb"
 	mssql "github.com/microsoft/go-mssqldb"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -95,9 +97,11 @@ func main() {
 	         ORDER BY qs.total_elapsed_time DESC
 	         `
 
-	//rows, err := queryStraightUp(db, query)
+	query = strings.Replace(query, "SOME_MATCHING_TEXT", uuid.New().String(), -1)
+	rows, err := queryStraightUp(db, query)
 	//rows, err := queryInTransaction(db,query)
-	rows, err := queryWithExperimentalMessageLoopModel(db, query)
+	//rows, err := queryWithConnection(db,query)
+	//rows, err := queryWithExperimentalMessageLoopModel(db, query)
 
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to execute query")
@@ -129,6 +133,15 @@ func printUsage() {
 	flag.PrintDefaults()
 	fmt.Printf("Example: --username user --password pwd --hostname 108.234.456.789 --clario-version 4.5")
 	os.Exit(1)
+}
+
+func queryWithConnection(db *sql.DB, query string) (*sql.Rows, error) {
+	conn, err := db.Conn(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+	return conn.QueryContext(context.Background(), query)
 }
 
 func queryStraightUp(db *sql.DB, query string) (*sql.Rows, error) {
@@ -174,6 +187,7 @@ func queryWithExperimentalMessageLoopModel(db *sql.DB, query string) (*sql.Rows,
 			inresult := rows.Next()
 			for inresult {
 				log.Info().Msgf("sqlexp.MsgNext")
+				inresult = rows.Next()
 			}
 		}
 	}
